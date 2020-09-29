@@ -51,8 +51,8 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_min=0.6, pm_init=1/dim
     #True/False?
 
     #Evaluate parent population
-    fit = np.array([problem(individual) for individual in x])
-    fit_scaled = fit - np.min(fit)
+    #fit = np.array([problem(individual) for individual in x])
+    #fit_scaled = fit - np.min(fit)
 
     step_pc = 2*(pc_init-pc_min)/budget
     step_pm = (pm_max-pm_init)/budget
@@ -64,6 +64,8 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_min=0.6, pm_init=1/dim
     while not problem.final_target_hit and problem.evaluations < budget:
         pc = max(pc_min, pc_init-run_time*step_pc)
         pm = min(pm_max, pm_init+run_time*step_pm)
+        fit = np.array([problem(individual) for individual in x])
+        fit_scaled = fit - np.min(fit)
         #Select the individuals to mate depending on their fitness
         selection_probability = fit_scaled/np.sum(fit_scaled)
         x_prime_index = np.random.choice(range(len(x)), len(x), replace = True, p = selection_probability)
