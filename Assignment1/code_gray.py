@@ -7,6 +7,21 @@ independent_runs = 20
 budget = 50000
 
 
+def bi2gray(a):
+    return np.concatenate([np.array([a[0]]),np.bitwise_xor(a[0:-1],a[1:])])
+
+
+def gray2bi(g):
+    a = [int(g[0])]
+ 
+    for i in range(1,len(g)):
+       # print("ai-1: ", a[i-1])
+       # print("type: ", type(a[i-1]))
+       # print("gi: ",g[i])
+       # print("type: ",type(g[i]))
+        a.append(np.bitwise_xor(a[i-1],int(g[i])))
+    return np.array(a)
+
 
 #n-point crossover(1-point crossover)
 def crossover_n(parent1, parent2, cross_points):
@@ -26,7 +41,7 @@ def crossover_n(parent1, parent2, cross_points):
 
 
 #uniform crossover
-def crossover_uniform(parent1, parent2, cross_points=0.4):
+def crossover_uniform(parent1, parent2, cross_points=0.5):
     """
     uniform crossover
     args:
@@ -54,7 +69,7 @@ def selection_p(problem, x, population):
     x_prime_index = np.random.choice(range(len(x)),population, replace=True, p=selection_probability)
     x_prime = x[x_prime_index]
     couples = [[x_prime[i-1],x_prime[i]] for i in range(1, len(x_prime),2)]
-    return couples
+    return np.array(couples)
 
 
 def selection_t(problem, x, population , n=10):
@@ -63,15 +78,20 @@ def selection_t(problem, x, population , n=10):
     n: size of tournament
     """
     fit = np.array([problem(individual) for individual in x])
+    
     x_prime = []
     for i in range(population):
         tournament = np.random.choice(np.arange(len(x)),n, replace=True)
+         
+        
+        
         selected_index = np.argmax(fit[tournament])
         selected = x[tournament][selected_index]
+      
         x_prime.append(selected)
     couples = [[x_prime[i-1],x_prime[i]] for i in range(1, len(x_prime),2)]
    
-    return couples
+    return np.array(couples)
     
 
 
@@ -116,6 +136,8 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_end=0.6, pm_init=1/dim
         pm = min(pm_end, pm_init+run_time*step_pm) if adaptive_m else pm_init 
        
         couples = selection(problem,x,population)
+        couples = list(map(bi2gray, couples)) #convert to gray code
+        
         x_prime_prime = []
         for couple in couples:
             if np.random.random() < pc: #Probability of crossover
@@ -140,14 +162,19 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_end=0.6, pm_init=1/dim
                     x_prime_prime[k][j] = -1*x_prime_prime[k][j] + 1 #Flip x_p_p[j]
 
         x_prime_prime_prime = x_prime_prime
+       # print(type(x_prime_prime_prime))
+       # print(x_prime_prime_prime)
+       # print(x_prime_prime_prime.shape)
+       # x_prime_prime_prime = list(map(gray2bi, x_prime_prime_prime))#convert to binary code
         #Evaluate the population
+        x_prime_prime_prime = [gray2bi(individual) for individual in x_prime_prime_prime]
         fit = [problem(individual) for individual in x_prime_prime_prime]
 
 
         #Check if you reached the optimum
         fopt = np.max(fit)
         run_time+=1
-        x = x_prime_prime_prime        
+        x = np.array(x_prime_prime_prime)        
     #Return the best fitting and the optimum
     return fopt
 
