@@ -69,7 +69,7 @@ def selection_p(problem, x, population):
     x_prime_index = np.random.choice(range(len(x)),population, replace=True, p=selection_probability)
     x_prime = x[x_prime_index]
     couples = [[x_prime[i-1],x_prime[i]] for i in range(1, len(x_prime),2)]
-    return np.array(couples)
+    return np.array(couples), np.max(fit)
 
 
 def selection_t(problem, x, population , n=10):
@@ -91,7 +91,7 @@ def selection_t(problem, x, population , n=10):
         x_prime.append(selected)
     couples = [[x_prime[i-1],x_prime[i]] for i in range(1, len(x_prime),2)]
    
-    return np.array(couples)
+    return np.array(couples), np.max(fit)
     
 
 
@@ -135,7 +135,7 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_end=0.6, pm_init=1/dim
         pc = max(pc_end, pc_init+run_time*step_pc) if adaptive_c else pc_init
         pm = min(pm_end, pm_init+run_time*step_pm) if adaptive_m else pm_init 
        
-        couples = selection(problem,x,population)
+        couples, fopt = selection(problem,x,population)
         couples = list(map(bi2gray, couples)) #convert to gray code
         
         x_prime_prime = []
@@ -162,17 +162,12 @@ def studentname1_studentname2_GA(problem, pc_init=0.9, pc_end=0.6, pm_init=1/dim
                     x_prime_prime[k][j] = -1*x_prime_prime[k][j] + 1 #Flip x_p_p[j]
 
         x_prime_prime_prime = x_prime_prime
-       # print(type(x_prime_prime_prime))
-       # print(x_prime_prime_prime)
-       # print(x_prime_prime_prime.shape)
-       # x_prime_prime_prime = list(map(gray2bi, x_prime_prime_prime))#convert to binary code
-        #Evaluate the population
         x_prime_prime_prime = [gray2bi(individual) for individual in x_prime_prime_prime]
-        fit = [problem(individual) for individual in x_prime_prime_prime]
+        #fit = [problem(individual) for individual in x_prime_prime_prime]
 
 
         #Check if you reached the optimum
-        fopt = np.max(fit)
+        #fopt = np.max(fit)
         run_time+=1
         x = np.array(x_prime_prime_prime)        
     #Return the best fitting and the optimum
